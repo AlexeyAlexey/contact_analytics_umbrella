@@ -18,3 +18,10 @@ config :swoosh, :api_client, false
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+
+config :contact_analytics, ContactAnalytics.Repo,
+  url: "mongodb://10.0.2.2:27017/test_contact_analytics",
+  timeout: 60_000,
+  idle_interval: 10_000,
+  queue_target: 5_000

@@ -11,9 +11,10 @@ defmodule ContactAnalytics.Application do
       {DNSCluster, query: Application.get_env(:contact_analytics, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ContactAnalytics.PubSub},
       # Start the Finch HTTP client for sending emails
-      {Finch, name: ContactAnalytics.Finch}
+      {Finch, name: ContactAnalytics.Finch},
       # Start a worker by calling: ContactAnalytics.Worker.start_link(arg)
       # {ContactAnalytics.Worker, arg}
+      {Mongo, ContactAnalytics.Repo.config()}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: ContactAnalytics.Supervisor)

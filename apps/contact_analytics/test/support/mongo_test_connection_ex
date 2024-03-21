@@ -1,0 +1,9 @@
+defmodule ContactAnalytics.MongoTestConnection do
+  @moduledoc false
+
+  @seeds ["10.0.2.2:27017"]
+
+  def connect() do
+    Mongo.start_link(database: "mongodb_test", seeds: @seeds, show_sensitive_data_on_connection_error: true)
+  end
+end

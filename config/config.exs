@@ -18,6 +18,21 @@ import Config
 # at the `config/runtime.exs`.
 config :contact_analytics, ContactAnalytics.Mailer, adapter: Swoosh.Adapters.Local
 
+config :contact_analytics, ContactAnalytics.Repo,
+  url: "mongodb://10.0.2.2:27017/contact_analytics",
+  timeout: 60_000,
+  idle_interval: 10_000,
+  queue_target: 5_000
+
+config :contact_analytics, :mongodb_driver,
+  migration: [
+    topology: :mongo,
+    collection: "migrations",
+    path: "migrations",
+    otp_app: :contact_analytics
+  ]
+
+
 config :contact_analytics_web,
   generators: [context_app: :contact_analytics]
 
