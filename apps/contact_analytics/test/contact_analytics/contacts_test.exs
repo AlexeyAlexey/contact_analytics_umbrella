@@ -86,10 +86,13 @@ defmodule ContactAnalytics.ContactsTest do
 
       [validated_docs,
        not_validated_docs,
-       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{app_id: c.app_id,
-                                                                              attrs: %{ bigint_id => 12345,
-                                                                                       string_id => "123456",
-                                                                                       "1234567" => 12345678 }}])
+       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id,
+                                                                              "attrs" => %{ bigint_id => "eeeee",
+                                                                                            string_id => "123456",
+                                                                                            "1234567" => 12345678 }},
+                                                                            %{"app_id" => c.app_id,
+                                                                              "attrs" => %{ bigint_id => 123333,
+                                                                                            string_id => "123456" }}])
 
            # res = ContactAnalytics.CustomAttrs.Docs.convert_validate(c.app_id, [%{app_id: c.app_id,
            #                                                            attrs: %{ bigint_id => 12345,
@@ -103,63 +106,13 @@ defmodule ContactAnalytics.ContactsTest do
      #                                                        %{id: 12345, v: 12345}],
      #                                          attr_string: [%{id: string_id, v: "string value"}]}
 
+     IO.inspect(validated_docs)
      IO.inspect(not_validated_docs)
+     IO.inspect(failed_params_format)
      # %Mongo.Stream{docs: [doc | _]} = Mongo.find(:mongo, Contact.collection_name, %{app_id: c.app_id, _id: doc_id})
 
      # assert [%{"id" => bigint_id, "v" => _, "in_at" => %DateTime{}, "up_at" => %DateTime{}}] = doc["attr_bigint"]
      # assert [%{"id" => string_id, "v" => _, "in_at" => %DateTime{}, "up_at" => %DateTime{}}] = doc["attr_string"]
     end
   end
-
-  # describe "contacts" do
-  #   alias ContactAnalytics.Contacts.Contact
-
-  #   import ContactAnalytics.ContactsFixtures
-
-  #   @invalid_attrs %{}
-
-  #   test "list_contacts/0 returns all contacts" do
-  #     contact = contact_fixture()
-  #     assert Contacts.list_contacts() == [contact]
-  #   end
-
-  #   test "get_contact!/1 returns the contact with given id" do
-  #     contact = contact_fixture()
-  #     assert Contacts.get_contact!(contact.id) == contact
-  #   end
-
-  #   test "create_contact/1 with valid data creates a contact" do
-  #     valid_attrs = %{}
-
-  #     assert {:ok, %Contact{} = contact} = Contacts.create_contact(valid_attrs)
-  #   end
-
-  #   test "create_contact/1 with invalid data returns error changeset" do
-  #     assert {:error, %Ecto.Changeset{}} = Contacts.create_contact(@invalid_attrs)
-  #   end
-
-  #   test "update_contact/2 with valid data updates the contact" do
-  #     contact = contact_fixture()
-  #     update_attrs = %{}
-
-  #     assert {:ok, %Contact{} = contact} = Contacts.update_contact(contact, update_attrs)
-  #   end
-
-  #   test "update_contact/2 with invalid data returns error changeset" do
-  #     contact = contact_fixture()
-  #     assert {:error, %Ecto.Changeset{}} = Contacts.update_contact(contact, @invalid_attrs)
-  #     assert contact == Contacts.get_contact!(contact.id)
-  #   end
-
-  #   test "delete_contact/1 deletes the contact" do
-  #     contact = contact_fixture()
-  #     assert {:ok, %Contact{}} = Contacts.delete_contact(contact)
-  #     assert_raise Ecto.NoResultsError, fn -> Contacts.get_contact!(contact.id) end
-  #   end
-
-  #   test "change_contact/1 returns a contact changeset" do
-  #     contact = contact_fixture()
-  #     assert %Ecto.Changeset{} = Contacts.change_contact(contact)
-  #   end
-  # end
 end

@@ -112,15 +112,13 @@ when there are
 100 attrs
 
 id is string ```(:crypto.strong_rand_bytes(20) |> Base.url_encode64)```
-v  is bigint ```:rand.uniform(1000000000000000000)```
+v  is bigint ```1```
 
 ```elixir
-field_g = fn(_) -> 
-  %{"id" => (:crypto.strong_rand_bytes(20) |> Base.url_encode64), "v" => :rand.uniform(1000000000000000000) }
-end
+:rand.uniform(1000000000000000000)
 
 field_g = fn(_) -> 
-  %{"id" => :rand.uniform(1000000000000000000), "v" => :rand.uniform(1000000000000000000) }
+  %{"id" => (:crypto.strong_rand_bytes(20) |> Base.url_encode64), "v" => 1 }
 end
 
 1..100_000
@@ -149,13 +147,13 @@ db.contacts.stats(1000000)
 ```
 
 ```
-"nindexes" : 2,
+ "nindexes" : 2,
  "indexBuilds" : [ ],
- "totalIndexSize" : 494,
- "totalSize" : 968,
+ "totalIndexSize" : 466,
+ "totalSize" : 837,
  "indexSizes" : {
   "_id_" : 1,
-  "attr_bigint.id_1_attr_bigint.v_1" : 492
+  "attr_bigint.id_1_attr_bigint.v_1" : 464
  },
  "scaleFactor" : 1000000,
  "ok" : 1
@@ -169,11 +167,11 @@ when there are
 100 attrs
 
 id is bigint :rand.uniform(1000000000000000000)
-v  is bigint :rand.uniform(1000000000000000000)
+v  is bigint 1
 
 ```elixir
 field_g = fn(_) -> 
-  %{"id" => :rand.uniform(1000000000000000000), "v" => :rand.uniform(1000000000000000000) }
+  %{"id" => :rand.uniform(1000000000000000000), "v" => 1 }
 end
 
 1..100_000
@@ -204,17 +202,17 @@ db.contacts.stats(1000000)
 ```
  "nindexes" : 2,
  "indexBuilds" : [ ],
- "totalIndexSize" : 264,
- "totalSize" : 514,
+ "totalIndexSize" : 186,
+ "totalSize" : 336,
  "indexSizes" : {
   "_id_" : 1,
-  "attr_bigint.id_1_attr_bigint.v_1" : 263
+  "attr_bigint.id_1_attr_bigint.v_1" : 185
  },
  "scaleFactor" : 1000000,
  "ok" : 1
 ```
 
-494 Mb (string)  264 Mb (bigint)
+466 Mb (string)  186 Mb (bigint)
 
 
 The bigint (int64) type is better for id attr than the string type.

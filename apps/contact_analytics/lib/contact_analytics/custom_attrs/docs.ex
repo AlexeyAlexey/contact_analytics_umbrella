@@ -51,14 +51,14 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
                                                                                            "not_valid_docs" => []})
   defp convert_attrs_to_docs([%{"attrs" => attrs} = doc | rest_docs], ids_data_type, data_type_setts, parsed_docs) do
     res = case convert_attrs_to_data_type_attrs(attrs, ids_data_type, data_type_setts) do
-      {:ok, res} ->
+      {:ok, valid_docs, _} ->
         res = Map.delete(doc, "attrs")
-        |> Map.merge(res)
+        |> Map.merge(valid_docs)
 
         Map.put(parsed_docs, "valid_docs", [res | parsed_docs["valid_docs"]])
-      {:error, res} ->
-        res = Map.delete(doc, "attrs")
-        |> Map.merge(res)
+      {:error, _, not_valid_docs} ->
+        res = Map.get(doc, "attrs")
+        |> Map.merge(not_valid_docs)
 
         Map.put(parsed_docs, "not_valid_docs", [res | parsed_docs["not_valid_docs"]])
     end
@@ -76,33 +76,66 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
   end
 
   defp convert_attrs_to_data_type_attrs(attrs, ids_data_type, data_type_setts) when is_map(attrs) do
-    Enum.reduce(attrs, %{"failed" => false}, fn el, acc ->
+    Enum.reduce(attrs, [%{}, %{}], fn el, acc ->
       {id, v} = el
       data_type = Map.get(ids_data_type, id)
+      setts = Map.get(data_type_setts, id, %{})
 
-      case AttrSchemas.validate(%{id: id, v: v},
-                                data_type,
-                                Map.get(data_type_setts, id, %{})) do
+      case AttrSchemas.validate(%{id: id, v: v}, data_type, setts) do
+        {:ok, doc} ->
+          valid_docs = List.last(acc)
 
-        {:ok, res} ->
-          Map.put(acc, "attr_#{data_type}", [res | Map.get(acc, "attr_#{data_type}", [])])
+          List.replace_at(acc, 1, Map.put(valid_docs, "attr_#{data_type}", [doc | Map.get(valid_docs, "attr_#{data_type}", [])]))
 
         {:error, errors} ->
-          Map.put(acc, "failed", true)
-          |>Map.put("attr_#{data_type}", [%{id: id, v: v, errors: errors} | Map.get(acc, "attr_#{data_type}", [])])
+          [not_valid | _valid] = acc
+
+          List.replace_at(acc, 0, Map.put(not_valid, id, {v, errors: errors}))
       end
     end)
     |> case do
-      %{"failed" => false} = attr_docs ->
-        {:ok, Map.delete(attr_docs, "failed")}
+      [not_valid_docs, valid_docs] when map_size(not_valid_docs) == 0 ->
+        {:ok, valid_docs, %{}}
 
-      attr_docs ->
-        {:error, Map.delete(attr_docs, "failed")}
+      [not_valid_docs, valid_docs] ->
+        {:error, valid_docs, not_valid_docs}
+
     end
   end
   defp convert_attrs_to_data_type_attrs(%{}, _, _) do
-    {:ok, %{}}
+    {:ok, %{}, %{}}
   end
+
+  # defp convert_attrs_to_data_type_attrs(attrs, ids_data_type, data_type_setts) when is_map(attrs) do
+  #   Enum.reduce(attrs, %{"failed_attrs" => %{}, "failed" => false}, fn el, acc ->
+  #     {id, v} = el
+  #     data_type = Map.get(ids_data_type, id)
+
+  #     case AttrSchemas.validate(%{id: id, v: v},
+  #                               data_type,
+  #                               Map.get(data_type_setts, id, %{})) do
+
+  #       {:ok, res} ->
+  #         Map.put(acc, "attr_#{data_type}", [res | Map.get(acc, "attr_#{data_type}", [])])
+
+  #       {:error, errors} ->
+  #         Map.put(acc, "failed", true)
+  #         |>Map.put("attr_#{data_type}", [%{id: id, v: v, errors: errors} | Map.get(acc, "attr_#{data_type}", [])])
+
+  #         # |>Map.put(acc, "failed_attrs", Map.put(Map.get(acc, "failed_attrs"), id, {v, errors: errors}))
+  #     end
+  #   end)
+  #   |> case do
+  #     %{"failed" => false} = attr_docs ->
+  #       {:ok, Map.delete(attr_docs, "failed")}
+
+  #     attr_docs ->
+  #       {:error, Map.delete(attr_docs, "failed")}
+  #   end
+  # end
+  # defp convert_attrs_to_data_type_attrs(%{}, _, _) do
+  #   {:ok, %{}}
+  # end
 
   defp convert_attrs_keys_to_int(docs, acc \\ %{"valid" => [], "not_valid" => []})
 
@@ -143,8 +176,6 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
     # %{ 1234 => %{length: 100}}
     {:ok, %{}}
   end
-
-
 
   # {:ok, ${ id => "bigint" ...}}
   # {:error, error}
