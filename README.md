@@ -413,3 +413,25 @@ object_id
 object_type    text
 custom_attr_id bigint
 value          string
+
+
+# Commands
+
+https://hexdocs.pm/mongodb_driver/Mix.Tasks.Mongo.html
+
+
+Migration
+
+```
+mix mongo.gen.migration add_custom_attrs_app_id_index
+
+mix mongo.migrate
+
+mix mongo.drop
+```
+
+test example
+
+```
+mix test ./apps/contact_analytics/test/contact_analytics/custom_attrs/docs_test.exs
+```

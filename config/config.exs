@@ -24,7 +24,7 @@ config :contact_analytics, ContactAnalytics.Repo,
   idle_interval: 10_000,
   queue_target: 5_000
 
-config :contact_analytics, :mongodb_driver,
+config :mongodb_driver,
   migration: [
     topology: :mongo,
     collection: "migrations",

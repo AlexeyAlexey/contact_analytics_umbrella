@@ -4,17 +4,15 @@ defmodule ContactAnalytics.AppsFixtures do
   entities via the `ContactAnalytics.Apps` context.
   """
 
-  @doc """
-  Generate a app.
-  """
-  def app_fixture(attrs \\ %{}) do
-    {:ok, app} =
-      attrs
-      |> Enum.into(%{
+  # @doc """
+  # Generate a app.
+  # """
+  # def app_fixture(attrs \\ %{}) do
+  #   {:ok, app} =
+  #     attrs
+  #     |> Enum.into(%{})
+  #     |> ContactAnalytics.Apps.create_app()
 
-      })
-      |> ContactAnalytics.Apps.create_app()
-
-    app
-  end
+  #   app
+  # end
 end

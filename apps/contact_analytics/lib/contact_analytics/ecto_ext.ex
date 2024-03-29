@@ -49,10 +49,13 @@ defmodule EctoExt do
           ""  -> {:ok, params[:func].()}
           _   -> {:ok, data}
         end
-        
       end
 
       def dump(data, _dumper, _params) do
+        {:ok, data}
+      end
+
+      def load(data, _loader, _params) do
         {:ok, data}
       end
     end
@@ -75,6 +78,10 @@ defmodule EctoExt do
       end
 
       def dump(data, _dumper, _params) do
+        {:ok, data}
+      end
+
+      def load(data, _loader, _params) do
         {:ok, data}
       end
     end

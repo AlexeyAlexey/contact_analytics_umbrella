@@ -92,7 +92,7 @@ defmodule ContactAnalytics.CustomAttrs do
     end
   end
 
-  defp insert_one(%Ecto.Changeset{valid?: false, errors: errors} = params) do
+  defp insert_one(%Ecto.Changeset{valid?: false, errors: errors}) do
     {:error, errors}
   end
 

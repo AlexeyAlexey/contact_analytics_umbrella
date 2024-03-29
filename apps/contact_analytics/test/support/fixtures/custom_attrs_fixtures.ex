@@ -9,7 +9,7 @@ defmodule ContactAnalytics.CustomAttrsFixtures do
   @doc """
   Generate a custom_attr.
   """
-  def custom_attr_fixture(%{app_id: app_id} = attrs) do
+  def custom_attr_fixture(%{app_id: app_id}) do
     # {:ok, app_id} = BSON.ObjectId.decode(app_id)
 
     Mongo.insert_many(:mongo,

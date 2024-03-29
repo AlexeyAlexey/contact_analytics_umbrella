@@ -5,7 +5,7 @@ defmodule ContactAnalytics.Contacts.Contact do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias EctoExt.DataType.{BSONObjectId, InList}
+  alias EctoExt.DataType.{BSONObjectId}
   alias ContactAnalytics.CustomAttrs.AttrSchemas.{AttrBigint,
                                                   AttrFloat,
                                                   AttrDecimal,

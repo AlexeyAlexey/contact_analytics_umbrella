@@ -47,8 +47,8 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
     acc
   end
 
-  defp convert_attrs_to_docs(docs, ids_data_type, data_type_setts \\ %{}, parsed_docs \\ %{"valid_docs" => [],
-                                                                                           "not_valid_docs" => []})
+  defp convert_attrs_to_docs(docs, ids_data_type, data_type_setts, parsed_docs \\ %{"valid_docs" => [],
+                                                                                    "not_valid_docs" => []})
   defp convert_attrs_to_docs([%{"attrs" => attrs} = doc | rest_docs], ids_data_type, data_type_setts, parsed_docs) do
     res = case convert_attrs_to_data_type_attrs(attrs, ids_data_type, data_type_setts) do
       {:ok, valid_docs, _} ->
@@ -60,16 +60,13 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
         res = Map.get(doc, "attrs")
         |> Map.merge(not_valid_docs)
 
-        Map.put(parsed_docs, "not_valid_docs", [res | parsed_docs["not_valid_docs"]])
+        Map.put(parsed_docs, "not_valid_docs", [Map.put(doc, "attrs", res) | parsed_docs["not_valid_docs"]])
     end
 
     convert_attrs_to_docs(rest_docs,
                           ids_data_type,
                           data_type_setts,
                           res)
-  end
-  defp convert_attrs_to_docs([], _, _, parsed_docs) do
-    [parsed_docs["valid_docs"], parsed_docs["not_valid_docs"]]
   end
   defp convert_attrs_to_docs([], _, _, parsed_docs) do
     [parsed_docs["valid_docs"], parsed_docs["not_valid_docs"]]
@@ -90,7 +87,7 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
         {:error, errors} ->
           [not_valid | _valid] = acc
 
-          List.replace_at(acc, 0, Map.put(not_valid, id, {v, errors: errors}))
+          List.replace_at(acc, 0, Map.put(not_valid, id, {v, [errors: errors]}))
       end
     end)
     |> case do
@@ -146,7 +143,8 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
         {k_i, _} ->
           Map.put(acc, k_i, v)
         :error ->
-          Map.put(acc, k, {:errors, [k, "key is not an integer", v]})
+          [errors: [id: {"is invalid", [type: :integer, validation: :cast]}]]
+          Map.put(acc, k, {v, [errors: [id: {"is invalid", [type: :integer, validation: :cast]}]]})
           |> Map.put("failed", true)
       end
     end)
@@ -172,7 +170,7 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
   end
 
 
-  defp select_data_type_setts(app_id, ids) do
+  defp select_data_type_setts(_app_id, _ids) do
     # %{ 1234 => %{length: 100}}
     {:ok, %{}}
   end
@@ -205,7 +203,7 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
   defp convert_to_integer(value) when is_integer(value) do
     {value, ""}
   end
-  defp convert_to_integer(value) do
+  defp convert_to_integer(_value) do
     :error
   end
 end
