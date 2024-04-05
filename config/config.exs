@@ -19,7 +19,11 @@ import Config
 config :contact_analytics, ContactAnalytics.Mailer, adapter: Swoosh.Adapters.Local
 
 config :contact_analytics, ContactAnalytics.Repo,
-  url: "mongodb://10.0.2.2:27017/contact_analytics",
+  url: "mongodb://10.0.2.2:35001/contact_analytics?type=single",
+  # url: "mongodb://10.0.2.2:27017/contact_analytics",
+  # hostname: "10.0.2.2",
+  # port: 35001,
+  # database: "contact_analytics",
   timeout: 60_000,
   idle_interval: 10_000,
   queue_target: 5_000

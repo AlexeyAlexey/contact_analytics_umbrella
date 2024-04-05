@@ -435,3 +435,67 @@ test example
 ```
 mix test ./apps/contact_analytics/test/contact_analytics/custom_attrs/docs_test.exs
 ```
+
+
+## MongoDB Kafka Connector
+
+[MongoDB Kafka Connector](https://www.mongodb.com/docs/kafka-connector/current/quick-start/#std-label-kafka-quick-start)
+
+MongoDB shell
+
+```
+mongosh mongodb://127.0.0.1:35001
+```
+
+
+```
+docker exec -it mongo1 /bin/bash
+```
+
+```
+curl -X POST \
+     -H "Content-Type: application/json" \
+     --data '
+     {"name": "mongo-source",
+      "config": {
+         "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
+         "connection.uri":"mongodb://mongo1:27017/?replicaSet=rs0",
+         "database":"contact_analytics",
+         "collection":"contacts",
+         "pipeline":"[{\"$match\": {\"operationType\": \"insert\"}}]"
+         }
+     }
+     ' \
+     http://connect:8083/connectors -w "\n"
+
+curl -X POST \
+     -H "Content-Type: application/json" \
+     --data '
+     {"name": "mongo-source-update",
+      "config": {
+         "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
+         "connection.uri":"mongodb://mongo1:27017/?replicaSet=rs0",
+         "database":"contact_analytics",
+         "collection":"contacts",
+         "pipeline":"[{\"$match\": {\"operationType\": \"update\"}}]"
+         }
+     }
+     ' \
+     http://connect:8083/connectors -w "\n"
+```
+
+```
+docker exec -it mongo1 /bin/bash
+```
+
+List of topics
+
+```
+kafkacat -b broker:29092  -L
+```
+
+Testing topic messages
+
+```
+kafkacat -b broker:29092 -t contact_analytics.contacts
+```
