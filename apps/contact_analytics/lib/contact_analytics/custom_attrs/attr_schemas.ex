@@ -131,7 +131,7 @@ defmodule ContactAnalytics.CustomAttrs.AttrSchemas do
       "utc_datetime" ->
         AttrUtcDateTime.validate(doc, setts)
       _ ->
-        {:error, [errors: [id: {"is invalid", [type: :integer, validation: :cast]}]]}
+        {:error, [id: {"does not belong to a data type", [type: :integer, validation: :cast]}]}
     end
   end
 end

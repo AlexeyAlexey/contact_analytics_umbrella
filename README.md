@@ -439,6 +439,8 @@ mix test ./apps/contact_analytics/test/contact_analytics/custom_attrs/docs_test.
 
 ## MongoDB Kafka Connector
 
+[processing_attrs_changes](https://github.com/AlexeyAlexey/processing_attrs_changes) is an app where you can find consumers
+
 [MongoDB Kafka Connector](https://www.mongodb.com/docs/kafka-connector/current/quick-start/#std-label-kafka-quick-start)
 
 MongoDB shell
@@ -456,10 +458,11 @@ docker exec -it mongo1 /bin/bash
 curl -X POST \
      -H "Content-Type: application/json" \
      --data '
-     {"name": "mongo-source",
+     {"name": "mongo-source-insert",
       "config": {
          "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
          "connection.uri":"mongodb://mongo1:27017/?replicaSet=rs0",
+         "topic.prefix":"insert",
          "database":"contact_analytics",
          "collection":"contacts",
          "pipeline":"[{\"$match\": {\"operationType\": \"insert\"}}]"
@@ -475,6 +478,7 @@ curl -X POST \
       "config": {
          "connector.class":"com.mongodb.kafka.connect.MongoSourceConnector",
          "connection.uri":"mongodb://mongo1:27017/?replicaSet=rs0",
+         "topic.prefix":"update",
          "database":"contact_analytics",
          "collection":"contacts",
          "pipeline":"[{\"$match\": {\"operationType\": \"update\"}}]"
@@ -483,6 +487,19 @@ curl -X POST \
      ' \
      http://connect:8083/connectors -w "\n"
 ```
+
+[REST Interface to manage connectors](https://docs.confluent.io/platform/current/connect/references/restapi.html)
+
+List of connectors
+```
+curl -X GET http://connect:8083/connectors
+```
+
+```
+curl -X DELETE http://connect:8083/connectors/mongo-source-insert
+curl -X DELETE http://connect:8083/connectors/mongo-source-update
+```
+
 
 ```
 docker exec -it mongo1 /bin/bash
@@ -497,5 +514,9 @@ kafkacat -b broker:29092  -L
 Testing topic messages
 
 ```
-kafkacat -b broker:29092 -t contact_analytics.contacts
+kafkacat -b broker:29092 -t insert.contact_analytics.contacts
+```
+
+```
+kafkacat -b broker:29092 -t update.contact_analytics.contacts
 ```

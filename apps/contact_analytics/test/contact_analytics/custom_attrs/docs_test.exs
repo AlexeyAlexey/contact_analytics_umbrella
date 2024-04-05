@@ -81,7 +81,7 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
       assert failed_params_format == []
     end
 
-    test "when id attr is invalid", c do
+    test "when id attr is not integer", c do
       {:ok, %{id: _bigint_id}} = CustomAttrs.create_custom_attr(%{app_id: c.app_id,
                                                                   name: "Test bigint",
                                                                   data_type: "bigint"})
@@ -103,6 +103,32 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
       assert [%{"app_id" => ^app_id,
                 "attrs" => %{"isnotint" => {12345, [errors: [id: {"is invalid", [type: :integer, validation: :cast]}]]},
                              ^string_id => "string value"}}] = failed_params_format
+    end
+
+    test "when id attr does not belong to a data type", c do
+      {:ok, %{id: _bigint_id}} = CustomAttrs.create_custom_attr(%{app_id: c.app_id,
+                                                                  name: "Test bigint",
+                                                                  data_type: "bigint"})
+
+      {:ok, %{id: string_id}} = CustomAttrs.create_custom_attr(%{app_id: c.app_id,
+                                                                 name: "Test string",
+                                                                 data_type: "string"})
+
+      [validated_docs,
+       not_validated_docs,
+       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id,
+                                                                              "attrs" => %{1000 => 12345,
+                                                                                           string_id => "string value"}}])
+
+      app_id = c.app_id
+
+      assert  [] == validated_docs
+
+      assert  [%{"app_id" => ^app_id,
+                 "attrs" => %{1000 => {12345, [errors: [id: {"does not belong to a data type", [type: :integer, validation: :cast]}]]},
+                              ^string_id => "string value"}}] = not_validated_docs
+
+      assert [] == failed_params_format
     end
 
   end
