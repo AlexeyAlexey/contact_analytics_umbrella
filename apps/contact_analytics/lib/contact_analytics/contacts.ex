@@ -8,31 +8,24 @@ defmodule ContactAnalytics.Contacts do
 
   alias ContactAnalytics.Contacts.Contact
 
-  alias ContactAnalytics.CustomAttrs.{ChangesetConv} # DocFilter
+  alias ContactAnalytics.CustomAttrs.{ChangesetConv}
   alias ContactAnalytics.CustomAttrs
 
-  # def create_contacts(attrs, valid_docs \\ [], not_valid_docs \\ [])
 
-  # def create_contacts([], valid_docs, not_valid_docs) do
-  #   case Mongo.insert_many(:mongo, Contact.collection_name, valid_docs) do
-  #     {:ok, res} ->
-  #       {:ok, [res, not_valid_docs]}
-  #     {:error, res} ->
-  #       {:error, [res, not_valid_docs]}
-  #   end
-  # end
+  def create_contacts([], _app_id) do
+    []
+  end
 
-  def create_contacts(app_id, docs) do
-    [validated_docs,
-     not_validated_docs,
-     failed_params_format] = CustomAttrs.Docs.convert_validate(app_id, docs)
-
+  def create_contacts(docs, app_id) do
     time_now = DateTime.utc_now()
 
-    docs = Enum.reduce(validated_docs, [[], []], fn doc, acc ->
-      doc = Map.merge(doc, %{"inserted_at" => time_now, "updated_at" => time_now})
+    Enum.reduce(docs, [[], []], fn doc, acc ->
+      Map.merge(doc, %{"app_id" => app_id,
+                       "inserted_at" => time_now,
+                       "updated_at" => time_now})
+      |> Contact.changeset_insert()
+      |> case do
 
-      case Contact.changeset_insert(%Contact{}, doc) do
         %Ecto.Changeset{valid?: true, changes: changes} ->
           valid_doc = ChangesetConv.to_map(changes)
 
@@ -47,56 +40,40 @@ defmodule ContactAnalytics.Contacts do
           List.replace_at(acc, 1, [%Ecto.Changeset{valid?: false, changes: changes, errors: errors} | not_valid_docs])
         end
     end)
+    |> case do # it should be refactored
+      [[], invalid_docs] ->
+        [[], invalid_docs]
+      [valid_docs, invalid_docs] ->
+        case insert_many(valid_docs) do
+          {:ok, ids} ->
+            [ids, [], invalid_docs]
 
-    [validated_docs, not_valid_docs] = docs
-
-    inserted = if validated_docs != [] do
-      insert_many(validated_docs)
-    end
-
-    [inserted, not_valid_docs]
-  end
-
-  def create_contact(%{"app_id" => app_id} = doc) do
-    case CustomAttrs.Docs.convert_validate_doc(app_id, doc) do
-      [validated_doc, nil, nil] ->
-
-        time_now = DateTime.utc_now()
-        doc = Map.merge(doc, %{"inserted_at" => time_now,
-                               "updated_at" => time_now})
-
-        case Contact.changeset_insert(%Contact{}, doc) do
-          %Ecto.Changeset{valid?: true, changes: changes} ->
-            ChangesetConv.to_map(changes)
-            |> insert_one
-
-          %Ecto.Changeset{valid?: false, changes: _, errors: errors} ->
-            {:error, errors}
+          {:error, errors} ->
+            [[], errors, invalid_docs]
         end
-
-      [nil, not_validated_doc, nil] ->
-
-        {:error, not_validated_doc}
-      [nil, nil, failed_params_format] ->
-
-        {:error, failed_params_format}
     end
   end
 
-  # def create_contact(%{"app_id" => _app_id} = doc) do
-  #    time_now = DateTime.utc_now()
-  #    doc = Map.merge(doc, %{"inserted_at" => time_now,
-  #                           "updated_at" => time_now})
+  def create_contact(nil, app_id) do
+    {:error, "doc cannot be nil"}
+  end
 
-  #    case Contact.changeset_insert(%Contact{}, doc) do
-  #      %Ecto.Changeset{valid?: true, changes: changes} ->
-  #        ChangesetConv.to_map(changes)
-  #        |> insert_one
+  def create_contact(doc, app_id) do
+    time_now = DateTime.utc_now()
 
-  #      %Ecto.Changeset{valid?: false, changes: _, errors: errors} ->
-  #        {:error, errors}
-  #    end
-  # end
+    Map.merge(doc, %{"app_id" => app_id,
+                     "inserted_at" => time_now,
+                     "updated_at" => time_now})
+    |> Contact.changeset_insert()
+    |> case do
+      %Ecto.Changeset{valid?: true, changes: changes} ->
+        ChangesetConv.to_map(changes)
+        |> insert_one
+
+      %Ecto.Changeset{valid?: false, changes: _, errors: errors} ->
+        {:error, errors}
+    end
+  end
 
   defp insert_one(doc) do
     case Mongo.insert_one(:mongo, Contact.collection_name, doc) do

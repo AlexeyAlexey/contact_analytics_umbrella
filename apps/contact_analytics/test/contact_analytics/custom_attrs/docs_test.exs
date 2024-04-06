@@ -22,9 +22,9 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
 
       [validated_docs,
        not_validated_docs,
-       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id,
-                                                                              "attrs" => %{bigint_id => 12345,
-                                                                                           string_id => "string value"}}])
+       failed_params_format] = CustomAttrs.Docs.convert_validate([%{"app_id" => c.app_id,
+                                                                    "attrs" => %{bigint_id => 12345,
+                                                                                 string_id => "string value"}}], c.app_id)
 
       app_id = c.app_id
 
@@ -47,7 +47,7 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
 
       [validated_docs,
        not_validated_docs,
-       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id, "name" => "name" }])
+       failed_params_format] = CustomAttrs.Docs.convert_validate([%{"app_id" => c.app_id, "name" => "name" }], c.app_id)
 
       app_id = c.app_id
 
@@ -68,9 +68,9 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
 
       [validated_docs,
        not_validated_docs,
-       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id,
-                                                                              "attrs" => %{bigint_id => "isnotbigint",
-                                                                                           string_id => "string value"}}])
+       failed_params_format] = CustomAttrs.Docs.convert_validate([%{"app_id" => c.app_id,
+                                                                    "attrs" => %{bigint_id => "isnotbigint",
+                                                                                 string_id => "string value"}}], c.app_id)
 
       app_id = c.app_id
 
@@ -92,9 +92,9 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
 
       [validated_docs,
        not_validated_docs,
-       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id,
-                                                                              "attrs" => %{"isnotint" => 12345,
-                                                                                           string_id => "string value"}}])
+       failed_params_format] = CustomAttrs.Docs.convert_validate([%{"app_id" => c.app_id,
+                                                                    "attrs" => %{"isnotint" => 12345,
+                                                                                 string_id => "string value"}}], c.app_id)
 
       app_id = c.app_id
 
@@ -116,9 +116,9 @@ defmodule ContactAnalytics.CustomAttrs.DocsTest do
 
       [validated_docs,
        not_validated_docs,
-       failed_params_format] = CustomAttrs.Docs.convert_validate(c.app_id, [%{"app_id" => c.app_id,
-                                                                              "attrs" => %{1000 => 12345,
-                                                                                           string_id => "string value"}}])
+       failed_params_format] = CustomAttrs.Docs.convert_validate([%{"app_id" => c.app_id,
+                                                                    "attrs" => %{1000 => 12345,
+                                                                                 string_id => "string value"}}], c.app_id)
 
       app_id = c.app_id
 

@@ -28,7 +28,7 @@ defmodule ContactAnalytics.Contacts.Contact do
     timestamps()
   end
 
-  def changeset_insert(custom_attr, params) do
+  def changeset_insert(params, custom_attr \\ %__MODULE__{}) do
     custom_attr
     |> cast(params, [:app_id, :inserted_at, :updated_at])
     |> cast_embed(:attr_bigint, with: &attr_changeset/2)

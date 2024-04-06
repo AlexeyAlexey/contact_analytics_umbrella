@@ -2,8 +2,8 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
 
   alias ContactAnalytics.CustomAttrs.{AttrSchemas, CustomAttr}
 
-  def convert_validate_doc(app_id, doc) do
-    case convert_validate(app_id, [doc]) do
+  def convert_validate_doc(doc, app_id) do
+    case convert_validate([doc], app_id) do
       [[], [], [failed_params_format | _]] ->
 
         [nil, nil, failed_params_format]
@@ -16,7 +16,7 @@ defmodule ContactAnalytics.CustomAttrs.Docs do
     end
   end
 
-  def convert_validate(app_id, docs) do
+  def convert_validate(docs, app_id) do
     %{"present" => present_attrs,
       "not_present" => not_present} = Enum.reduce(docs, %{"present" => [], "not_present" => []}, fn el, acc ->
       if Map.has_key?(el, "attrs") do
